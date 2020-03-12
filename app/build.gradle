@@ -1,0 +1,70 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    compileSdkVersion COMPILE_SDK_VERSION
+    buildToolsVersion BUILD_TOOLS_VERSION
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        minSdkVersion MIN_SDK_VERSION
+        targetSdkVersion TARGET_SDK_VERSION
+
+        applicationId APP_ID
+
+        versionCode VERSION_CODE
+        versionName VERSION_NAME
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation dep.kotlinStd
+    implementation dep.anko
+
+    implementation dep.appCompat
+    implementation dep.ktxCore
+
+    // RecyclerView
+    implementation dep.recyclerView
+
+    // Glide
+    implementation dep.glide
+    implementation dep.glideAnnotations
+    annotationProcessor dep.glideCompiler
+
+    // ButterKnife
+    implementation dep.butterknife
+    annotationProcessor dep.butterknifeCompiler
+
+    // Dagger
+    implementation dep.dagger
+    annotationProcessor dep.daggerCompiler
+
+    // RxAndroid
+    implementation dep.rxAndroid
+    implementation dep.rxJava
+
+    // Retrofit
+    implementation dep.retrofit
+    implementation dep.retrofitConvGson
+    implementation dep.okhttpLogging
+    implementation dep.retrofitAdaptRx
+
+    // Stetho
+    implementation dep.facebookStetho
+    implementation dep.facebookStethoOkhttp
+}
