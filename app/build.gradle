@@ -62,6 +62,9 @@ dependencies {
     implementation dep.rxAndroid
     implementation dep.rxJava
 
+    //RxBinding
+    implementation dep.rxBinding
+
     // Retrofit
     implementation dep.retrofit
     implementation dep.retrofitConvGson

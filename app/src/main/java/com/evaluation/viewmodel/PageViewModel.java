@@ -10,13 +10,22 @@ import androidx.lifecycle.ViewModel;
  */
 public class PageViewModel extends ViewModel {
 
+    private MutableLiveData<String> mSearch = new MutableLiveData<>();
     private MutableLiveData<Integer> mAssetId = new MutableLiveData<>();
 
-    public void setName(Integer name) {
+    public void setSearchTerm(String name) {
+        mSearch.setValue(name);
+    }
+
+    public LiveData<String> getSearchTerm() {
+        return mSearch;
+    }
+
+    public void setAssetId(Integer name) {
         mAssetId.setValue(name);
     }
 
-    public LiveData<Integer> getName() {
+    public LiveData<Integer> getAssetId() {
         return mAssetId;
     }
 }

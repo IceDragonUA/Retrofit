@@ -3,4 +3,6 @@
 
     <string name="category_1">Movies</string>
     <string name="category_2">Detail</string>
+
+    <string name="search">Search</string>
 </resources>

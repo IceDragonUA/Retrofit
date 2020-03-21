@@ -17,6 +17,7 @@ import com.evaluation.model.asset.Asset;
 import com.evaluation.network.RestAdapter;
 import com.evaluation.retrofit.MainActivity;
 import com.evaluation.retrofit.R;
+import com.evaluation.utils.RxUtils;
 import com.evaluation.viewmodel.PageViewModel;
 
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +37,7 @@ import io.reactivex.schedulers.Schedulers;
  */
 public class DetailFragment extends Fragment {
 
-    public final String TAG = DetailFragment.class.getCanonicalName();
+    private final String TAG = DetailFragment.class.getCanonicalName();
 
     private static String BASE_IMAGE_URL = "https://image.tmdb.org/t/p/w780";
 
@@ -47,6 +48,8 @@ public class DetailFragment extends Fragment {
     private MainActivity mActivity;
 
     private PageViewModel mPageViewModel;
+
+    private Disposable mDisposable;
 
     private View mRootView;
 
@@ -87,32 +90,32 @@ public class DetailFragment extends Fragment {
     }
 
     private void loadAssetDetail() {
-        mPageViewModel.getName().observe(requireActivity(), id ->
-                restAdapter.getRestApiService().getAssetById(id)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new SingleObserver<Asset>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
+        mPageViewModel.getAssetId().observe(requireActivity(), id -> {
+            RxUtils.disposeSilently(mDisposable);
+            restAdapter.getRestApiService().getAssetById(id, "en-US")
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new SingleObserver<Asset>() {
+                        @Override
+                        public void onSubscribe(Disposable disposable) {
+                            mDisposable = disposable;
+                        }
 
-                    }
+                        @Override
+                        public void onSuccess(Asset asset) {
+                            Glide.with(mActivity)
+                                    .load(BASE_IMAGE_URL + asset.getPosterPath())
+                                    .into(logoView);
 
-                    @Override
-                    public void onSuccess(Asset asset) {
-                        Glide.with(mActivity)
-                                .load(BASE_IMAGE_URL + asset.getPosterPath())
-                                .into(logoView);
+                            titleView.setText(asset.getTitle());
+                            descriptionView.setText(asset.getOverview());
+                        }
 
-                        titleView.setText(asset.getTitle());
-                        descriptionView.setText(asset.getOverview());
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e(TAG, "onError: ", e);
-                    }
-                }));
-
-
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.e(TAG, "onError: ", e);
+                        }
+                    });
+        });
     }
 }
