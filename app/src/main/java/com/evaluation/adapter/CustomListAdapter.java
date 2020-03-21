@@ -56,6 +56,11 @@ public class CustomListAdapter extends RecyclerView.Adapter<CustomListAdapter.Li
         return (null != searchResultList ? searchResultList.size() : 0);
     }
 
+    public void insertList (int position, List<SearchResult> list) {
+        searchResultList.addAll(list);
+        notifyItemRangeChanged(position, getItemCount());
+    }
+
     static class ListAdapterHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.title)

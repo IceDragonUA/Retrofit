@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SearchView;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -44,6 +45,14 @@ public class MainFragment extends Fragment {
         return new MainFragment();
     }
 
+    private static int PAGE_SIZE = 20;
+
+    private int mCurrentPage = 1;
+    private int mPageCount = Integer.MAX_VALUE;
+
+    private String mSearchTerm;
+    private boolean mIsLoading;
+
     private MainActivity mActivity;
 
     private PageViewModel mPageViewModel;
@@ -59,7 +68,9 @@ public class MainFragment extends Fragment {
     SearchView mSearchView;
 
     @BindView(R.id.recycler_view)
-    RecyclerView recycleView;
+    RecyclerView mListView;
+
+    private CustomListAdapter mAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -75,17 +86,38 @@ public class MainFragment extends Fragment {
         if (mRootView == null) {
             mRootView = inflater.inflate(R.layout.main_layout, container, false);
             ButterKnife.bind(this, mRootView);
-            recycleView.setLayoutManager(new LinearLayoutManager(mActivity));
+            LinearLayoutManager layoutManager = new LinearLayoutManager(mActivity);
+            mListView.setLayoutManager(layoutManager);
+            mListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    int visibleItemCount = layoutManager.getChildCount();
+                    int totalItemCount = layoutManager.getItemCount();
+                    int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+                    if (!mIsLoading) {
+                        if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
+                                && firstVisibleItemPosition >= 0
+                                && totalItemCount >= PAGE_SIZE) {
+                            mIsLoading = true;
+                            mCurrentPage++;
+                            loadAssetList(mSearchTerm, true);
+                        }
+                    }
+                }
+            });
             mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String query) {
-                    loadAssetList(query);
+                    mCurrentPage = 1;
+                    loadAssetList(query, false);
                     return false;
                 }
 
                 @Override
                 public boolean onQueryTextChange(String newText) {
-                    loadAssetList(newText);
+                    mCurrentPage = 1;
+                    loadAssetList(newText, false);
                     return false;
                 }
             });
@@ -99,9 +131,12 @@ public class MainFragment extends Fragment {
         mActivity = (MainActivity) getActivity();
     }
 
-    private void loadAssetList(String query) {
+    private void loadAssetList(String query, boolean insert) {
+        if (mCurrentPage > mPageCount) {
+            return;
+        }
         RxUtils.disposeSilently(mDisposable);
-        restAdapter.getRestApiService().getSearchData(query, "en-US", 1, false)
+        restAdapter.getRestApiService().getSearchData(query, "en-US", mCurrentPage, false)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SingleObserver<SearchList>() {
@@ -112,23 +147,33 @@ public class MainFragment extends Fragment {
 
                     @Override
                     public void onSuccess(SearchList searchList) {
+                        mIsLoading = false;
+
                         if (searchList == null ||
                                 searchList.getSearchResultList().isEmpty() ||
                                 searchList.getSearchResultList().get(0) == null) {
                             return;
                         }
 
-                        CustomListAdapter adapter = new CustomListAdapter(
-                                mActivity,
-                                searchList.getSearchResultList(),
-                                selectedSearchResult -> mPageViewModel.setAssetId(selectedSearchResult.getId())
-                        );
-                        recycleView.setAdapter(adapter);
+                        if (insert) {
+                            mAdapter.insertList(mAdapter.getItemCount(), searchList.getSearchResultList());
+                        } else {
+                            mAdapter = new CustomListAdapter(
+                                    mActivity,
+                                    searchList.getSearchResultList(),
+                                    selectedSearchResult -> mPageViewModel.setAssetId(selectedSearchResult.getId())
+                            );
+                            mListView.setAdapter(mAdapter);
+                        }
                         mPageViewModel.setAssetId(searchList.getSearchResultList().get(0).getId());
+                        mPageCount = searchList.getTotalPages();
+                        mSearchTerm = query;
                     }
 
                     @Override
                     public void onError(Throwable e) {
+                        mIsLoading = false;
+
                         Log.e(TAG, "onError: ", e);
                     }
                 });
