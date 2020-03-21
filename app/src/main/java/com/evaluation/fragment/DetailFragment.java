@@ -1,6 +1,7 @@
 package com.evaluation.fragment;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -108,7 +109,7 @@ public class DetailFragment extends Fragment {
 
                     @Override
                     public void onError(Throwable e) {
-
+                        Log.e(TAG, "onError: ", e);
                     }
                 }));
 
