@@ -3,19 +3,28 @@ package com.evaluation.retrofit;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.ViewPager;
 
+import com.evaluation.adapter.CustomPagerAdapter;
 import com.evaluation.dagger.data.DataComponent;
-import com.evaluation.fragment.BaseFragment;
-import com.evaluation.navigation.Navigator;
+import com.evaluation.fragment.DetailFragment;
+import com.evaluation.fragment.MainFragment;
+import com.google.android.material.tabs.TabLayout;
 
-import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
 
-    @Inject
-    Navigator mNavigator;
+    @BindView(R.id.tabs)
+    TabLayout mTab;
+
+    @BindView(R.id.view_pager)
+    ViewPager mViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,22 +34,13 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        DataComponent.Injector.getComponent().inject(this);
-
         ButterKnife.bind(this);
 
-        mNavigator.init(this);
-        mNavigator.showMainFragment();
-    }
+        List<Fragment> fragments = new ArrayList<>();
+        fragments.add(MainFragment.newInstance());
+        fragments.add(DetailFragment.newInstance());
 
-    @Override
-    public void onBackPressed() {
-        BaseFragment currentFragment = mNavigator.getContentFragment();
-
-        // Dispatch back event to the current fragment.
-        if (currentFragment != null && currentFragment.onBackPressed()) {
-            return;
-        }
-        super.onBackPressed();
+        mViewPager.setAdapter(new CustomPagerAdapter(this, fragments, getSupportFragmentManager()));
+        mTab.setupWithViewPager(mViewPager);
     }
 }

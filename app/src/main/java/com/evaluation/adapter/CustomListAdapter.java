@@ -39,8 +39,7 @@ public class CustomListAdapter extends RecyclerView.Adapter<CustomListAdapter.Li
     @NotNull
     @Override
     public ListAdapterHolder onCreateViewHolder(ViewGroup viewGroup, int position) {
-        View rootView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item, viewGroup, false);
-        return new ListAdapterHolder(context, rootView);
+        return new ListAdapterHolder(context, LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item, viewGroup, false));
     }
 
     @Override
@@ -75,13 +74,13 @@ public class CustomListAdapter extends RecyclerView.Adapter<CustomListAdapter.Li
 
         void bind(final SearchResult selectedSearchResult, final ICommand<SearchResult> assetClickCommand) {
 
+            itemView.setOnClickListener(view -> assetClickCommand.execute(selectedSearchResult));
+
             titleView.setText(selectedSearchResult.getTitle());
 
             Glide.with(mContext)
                     .load(BASE_IMAGE_URL + selectedSearchResult.getPosterPath())
                     .into(thumbnailView);
-
-            itemView.setOnClickListener(v -> assetClickCommand.execute(selectedSearchResult));
         }
     }
 }

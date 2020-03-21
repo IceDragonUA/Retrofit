@@ -10,8 +10,7 @@ import dagger.Component;
  */
 @Singleton
 @Component(modules = {
-        RestAdapterModule.class,
-        NavigatorModule.class
+        RestAdapterModule.class
 })
 public interface DataComponent extends DataGraph {
 
@@ -25,7 +24,6 @@ public interface DataComponent extends DataGraph {
         public static void init() {
             sComponent = DaggerDataComponent.builder()
                     .restAdapterModule(RestAdapterModule.getInstance())
-                    .navigatorModule(NavigatorModule.getInstance())
                     .build();
         }
 

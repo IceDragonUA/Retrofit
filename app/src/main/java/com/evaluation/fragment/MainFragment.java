@@ -5,17 +5,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.evaluation.adapter.CustomListAdapter;
 import com.evaluation.dagger.data.DataComponent;
 import com.evaluation.model.search.SearchList;
-import com.evaluation.navigation.Navigator;
 import com.evaluation.network.RestAdapter;
 import com.evaluation.retrofit.MainActivity;
 import com.evaluation.retrofit.R;
+import com.evaluation.viewmodel.PageViewModel;
+
+import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 
@@ -30,7 +33,8 @@ import io.reactivex.schedulers.Schedulers;
  * @author Vladyslav Havrylenko
  * @since 09.03.2020
  */
-public class MainFragment extends BaseFragment {
+public class MainFragment extends Fragment {
+
     public final String TAG = MainFragment.class.getCanonicalName();
 
     public static MainFragment newInstance() {
@@ -39,10 +43,9 @@ public class MainFragment extends BaseFragment {
 
     private MainActivity mActivity;
 
-    protected View mRootView;
+    private PageViewModel mPageViewModel;
 
-    @Inject
-    Navigator mNavigator;
+    private View mRootView;
 
     @Inject
     RestAdapter restAdapter;
@@ -55,11 +58,12 @@ public class MainFragment extends BaseFragment {
         super.onCreate(savedInstanceState);
 
         DataComponent.Injector.getComponent().inject(this);
+
+        mPageViewModel = new ViewModelProvider(requireActivity()).get(PageViewModel.class);
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (mRootView == null) {
             mRootView = inflater.inflate(R.layout.main_layout, container, false);
             ButterKnife.bind(this, mRootView);
@@ -89,9 +93,10 @@ public class MainFragment extends BaseFragment {
                         CustomListAdapter adapter = new CustomListAdapter(
                                 mActivity,
                                 searchList.getSearchResultList(),
-                                selectedProject -> mNavigator.showDetailFragment(selectedProject.getId())
+                                selectedSearchResult -> mPageViewModel.setName(selectedSearchResult.getId())
                         );
                         recycleView.setAdapter(adapter);
+                        mPageViewModel.setName(searchList.getSearchResultList().get(0).getId());
                     }
 
                     @Override

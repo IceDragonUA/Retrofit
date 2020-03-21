@@ -36,7 +36,11 @@ dependencies {
     implementation dep.anko
 
     implementation dep.appCompat
+    implementation dep.material
     implementation dep.ktxCore
+
+    implementation dep.lifeCycle
+    implementation dep.legacySupport
 
     // RecyclerView
     implementation dep.recyclerView

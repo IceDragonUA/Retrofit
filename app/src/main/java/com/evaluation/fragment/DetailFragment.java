@@ -7,7 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
 import com.evaluation.dagger.data.DataComponent;
@@ -15,6 +16,9 @@ import com.evaluation.model.asset.Asset;
 import com.evaluation.network.RestAdapter;
 import com.evaluation.retrofit.MainActivity;
 import com.evaluation.retrofit.R;
+import com.evaluation.viewmodel.PageViewModel;
+
+import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 
@@ -29,24 +33,21 @@ import io.reactivex.schedulers.Schedulers;
  * @author Vladyslav Havrylenko
  * @since 09.03.2020
  */
-public class DetailFragment extends BaseFragment {
+public class DetailFragment extends Fragment {
+
     public final String TAG = DetailFragment.class.getCanonicalName();
 
-    public static final int NO_SELECTION = -1;
-
-    private static final String EXTRA_ASSET_ID = "EXTRA_ASSET_ID";
     private static String BASE_IMAGE_URL = "https://image.tmdb.org/t/p/w780";
 
-    public static DetailFragment newInstance(int assetId) {
-        Bundle args = new Bundle();
-        args.putInt(EXTRA_ASSET_ID, assetId);
-        DetailFragment fragment = new DetailFragment();
-        fragment.setArguments(args);
-        return fragment;
+    public static DetailFragment newInstance() {
+        return new DetailFragment();
     }
+
     private MainActivity mActivity;
 
-    protected View mRootView;
+    private PageViewModel mPageViewModel;
+
+    private View mRootView;
 
     @Inject
     RestAdapter restAdapter;
@@ -60,24 +61,20 @@ public class DetailFragment extends BaseFragment {
     @BindView(R.id.description)
     TextView descriptionView;
 
-    private int assetId;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         DataComponent.Injector.getComponent().inject(this);
-
-        assetId = getArguments().getInt(EXTRA_ASSET_ID, NO_SELECTION);
+        mPageViewModel = new ViewModelProvider(requireActivity()).get(PageViewModel.class);
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (mRootView == null) {
             mRootView = inflater.inflate(R.layout.info_layout, container, false);
             ButterKnife.bind(this, mRootView);
-            loadAssetDetail(assetId);
+            loadAssetDetail();
         }
         return mRootView;
     }
@@ -88,8 +85,9 @@ public class DetailFragment extends BaseFragment {
         mActivity = (MainActivity) getActivity();
     }
 
-    private void loadAssetDetail(int assetId) {
-        restAdapter.getRestApiService().getAssetById(assetId)
+    private void loadAssetDetail() {
+        mPageViewModel.getName().observe(requireActivity(), id ->
+                restAdapter.getRestApiService().getAssetById(id)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SingleObserver<Asset>() {
@@ -112,10 +110,8 @@ public class DetailFragment extends BaseFragment {
                     public void onError(Throwable e) {
 
                     }
-                });
-    }
+                }));
 
-    public boolean onBackPressed() {
-        return false;
+
     }
 }
