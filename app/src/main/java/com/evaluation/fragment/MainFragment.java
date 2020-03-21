@@ -164,8 +164,8 @@ public class MainFragment extends Fragment {
                                     selectedSearchResult -> mPageViewModel.setAssetId(selectedSearchResult.getId())
                             );
                             mListView.setAdapter(mAdapter);
+                            mPageViewModel.setAssetId(searchList.getSearchResultList().get(0).getId());
                         }
-                        mPageViewModel.setAssetId(searchList.getSearchResultList().get(0).getId());
                         mPageCount = searchList.getTotalPages();
                         mSearchTerm = query;
                     }
