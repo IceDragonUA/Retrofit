@@ -3,26 +3,30 @@ package com.evaluation.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
-import butterknife.BindView
-import butterknife.ButterKnife
 import com.bumptech.glide.Glide
 import com.evaluation.adapter.CustomListAdapter.ListAdapterHolder
-import com.evaluation.command.ICommand
 import com.evaluation.model.search.SearchResult
 import com.evaluation.retrofit.R
+import kotlinx.android.synthetic.main.list_item.view.*
 
-class CustomListAdapter(private val context: FragmentActivity?, private val searchResultList: MutableList<SearchResult>, private val clickCommand: ICommand<SearchResult>) :
+class CustomListAdapter(
+    private val context: FragmentActivity?,
+    private val searchResultList: MutableList<SearchResult>,
+    private val clickCommand: (SearchResult) -> Unit
+) :
     RecyclerView.Adapter<ListAdapterHolder>() {
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, position: Int): ListAdapterHolder =
-        ListAdapterHolder(context, LayoutInflater.from(viewGroup.context).inflate(R.layout.list_item, viewGroup, false))
+        ListAdapterHolder(
+            LayoutInflater.from(viewGroup.context).inflate(R.layout.list_item, viewGroup, false),
+            context,
+            clickCommand
+        )
 
     override fun onBindViewHolder(searchListAdapterHolder: ListAdapterHolder, position: Int) =
-        searchListAdapterHolder.bind(getItem(position), clickCommand)
+        searchListAdapterHolder.bind(getItem(position))
 
     private fun getItem(position: Int): SearchResult {
         return searchResultList[position]
@@ -37,32 +41,26 @@ class CustomListAdapter(private val context: FragmentActivity?, private val sear
         notifyItemRangeChanged(position, itemCount)
     }
 
-    class ListAdapterHolder(private val mContext: FragmentActivity?, view: View) : RecyclerView.ViewHolder(view) {
+    class ListAdapterHolder(
+        view: View,
+        private val mContext: FragmentActivity?,
+        private val assetClickCommand: (SearchResult) -> Unit
+    ) : RecyclerView.ViewHolder(view) {
 
         companion object {
             private const val BASE_IMAGE_URL = "https://image.tmdb.org/t/p/w185"
         }
 
-        @BindView(R.id.title)
-        lateinit var titleView: TextView
+        fun bind(selectedSearchResult: SearchResult) {
 
-        @BindView(R.id.thumbnail)
-        lateinit var thumbnailView: ImageView
+            itemView.setOnClickListener { assetClickCommand(selectedSearchResult) }
 
-        init {
-            ButterKnife.bind(this, view)
-        }
-
-        fun bind(selectedSearchResult: SearchResult, assetClickCommand: ICommand<SearchResult>) {
-
-            itemView.setOnClickListener { assetClickCommand.execute(selectedSearchResult) }
-
-            titleView.text = selectedSearchResult.title
+            itemView.title.text = selectedSearchResult.title
 
             mContext?.let {
                 Glide.with(it)
                     .load(BASE_IMAGE_URL + selectedSearchResult.posterPath)
-                    .into(thumbnailView)
+                    .into(itemView.thumbnail)
             }
         }
     }

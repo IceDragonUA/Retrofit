@@ -6,15 +6,16 @@
     android:orientation="vertical">
 
     <SearchView
-        android:id="@+id/search_edit_text"
+        android:id="@+id/searchView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:iconifiedByDefault="false"
         android:queryHint="@string/search" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view"
+        android:id="@+id/listView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
 </LinearLayout>
 

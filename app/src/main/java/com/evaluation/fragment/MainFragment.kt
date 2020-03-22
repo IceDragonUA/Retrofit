@@ -13,12 +13,9 @@ import androidx.recyclerview.widget.RecyclerView
 import butterknife.BindView
 import butterknife.ButterKnife
 import com.evaluation.adapter.CustomListAdapter
-import com.evaluation.command.ICommand
 import com.evaluation.dagger.data.DataComponent.Injector.component
 import com.evaluation.model.search.SearchList
-import com.evaluation.model.search.SearchResult
 import com.evaluation.network.RestAdapter
-import com.evaluation.retrofit.MainActivity
 import com.evaluation.retrofit.R
 import com.evaluation.utils.RxUtils.disposeSilently
 import com.evaluation.viewmodel.PageViewModel
@@ -49,11 +46,11 @@ class MainFragment : Fragment() {
     @Inject
     lateinit var restAdapter: RestAdapter
 
-    @BindView(R.id.search_edit_text)
+    @BindView(R.id.searchView)
     lateinit var mSearchView: SearchView
 
 
-    @BindView(R.id.recycler_view)
+    @BindView(R.id.listView)
     lateinit var mListView: RecyclerView
 
     lateinit var mAdapter: CustomListAdapter
@@ -131,15 +128,7 @@ class MainFragment : Fragment() {
                     if (insert) {
                         mAdapter.insertList(mAdapter.itemCount, searchList.searchResultList)
                     } else {
-                        mAdapter = CustomListAdapter(
-                            activity,
-                            searchList.searchResultList,
-                            object : ICommand<SearchResult> {
-                                override fun execute(param: SearchResult) {
-                                    mPageViewModel.setAssetId(param.id)
-                                }
-                            }
-                        )
+                        mAdapter = CustomListAdapter(activity, searchList.searchResultList) { mPageViewModel.setAssetId(it.id) }
                         mListView.adapter = mAdapter
                         mPageViewModel.setAssetId(searchList.searchResultList[0].id)
                     }
