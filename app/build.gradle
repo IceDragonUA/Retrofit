@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion COMPILE_SDK_VERSION
@@ -53,10 +54,12 @@ dependencies {
     // ButterKnife
     implementation dep.butterknife
     annotationProcessor dep.butterknifeCompiler
+    kapt dep.butterknifeCompiler
 
     // Dagger
     implementation dep.dagger
     annotationProcessor dep.daggerCompiler
+    kapt dep.daggerCompiler
 
     // RxAndroid
     implementation dep.rxAndroid

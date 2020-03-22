@@ -1,10 +1,9 @@
 /*
  * Copyright ( c ) 2017, 3ScreenSolutions GmbH & Co. KG, All Rights Reserved.
  */
+package com.evaluation.utils
 
-package com.evaluation.utils;
-
-import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.Disposable
 
 /**
  * Utility class for RX related operations.
@@ -12,15 +11,15 @@ import io.reactivex.disposables.Disposable;
  * @author Barabas Attila
  * @since 2018.07.02
  */
-public class RxUtils {
+object RxUtils {
     /**
      * Dispose the given RX observable without logs.
      */
-    public static void disposeSilently(Disposable disposable) {
-        if (disposable != null && !disposable.isDisposed()) {
+    fun disposeSilently(disposable: Disposable?) {
+        if (disposable != null && !disposable.isDisposed) {
             try {
-                disposable.dispose();
-            } catch (Exception e) {
+                disposable.dispose()
+            } catch (e: Exception) {
                 // Ignore
             }
         }

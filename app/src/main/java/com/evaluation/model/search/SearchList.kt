@@ -11,5 +11,5 @@ data class SearchList(
     val totalPages: Int,
 
     @SerializedName("results")
-    val searchResultList: List<SearchResult>
+    val searchResultList: MutableList<SearchResult>
 )
